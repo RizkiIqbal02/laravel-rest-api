@@ -12,11 +12,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        // $customers = Customer::paginate(15);
-        $customers = Customer::all();
+        $customers = Customer::paginate(15);
+        // $customers = Customer::all();
         return response()->json([
             'data' => $customers
-        ]);
+        ], 200);
     }
 
     /**
@@ -30,51 +30,30 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Customer $customer)
     {
-        // $customer = Customer::create([
-        //     'name' => $request->name,
-        //     'id_number' => $request->id_number,
-        //     'dob' => $request->dob,
-        //     'email' => $request->email
-        // ]);
+        $customer = Customer::create([
+            'name' => $request->name,
+            'id_number' => $request->id_number,
+            'dob' => $request->dob,
+            'email' => $request->email
+        ]);
 
-        // return response()->json([
-        //     'data' => $customer
-        // ]);
-        $name = $request->input('name');
-        $id_number = $request->input('id_number');
-        $dob = $request->input('dob');
-        $email = $request->input('email');
-
-        // Lakukan validasi data jika diperlukan
-        if (!$name || !$email || !$id_number || !$dob) {
-            return response()->json(['error' => 'Invalid data'], 400);
-        }
-
-        // Proses penambahan pelanggan ke dalam database atau penyimpanan lainnya
-        $customer = new Customer();
-        $customer->name = $name;
-        $customer->id_number = $id_number;
-        $customer->dob = $dob;
-        $customer->email = $email;
-        $customer->save();
-
-        return response()->json(['message' => 'Customer added successfully'], 201);
+        return response()->json([
+            'data' => $customer
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function show($id)
     {
-        $id = $request->query('id');
-
-
         $customer = Customer::find($id);
-
-        if (!$customer){
-            return response()->json(['error' => 'Customer with id '. $id . ' Not found'], 404);
+        if (!$customer) {
+            return response()->json([
+                'message' => 'customer with id '.$id.' Not Found'
+            ], 404);
         }
         return response()->json([
             'data' => $customer
@@ -92,50 +71,33 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Customer $customer)
     {
         //
 
-        $customer = Customer::find($id);
+        $customer->name = $request->name;
+        $customer->id_number = $request->id_number;
+        $customer->dob = $request->dob;
+        $customer->email = $request->email;
+        $customer->save();
 
+        return response()->json([
+            'data' => $customer
+        ], 200);
 
-
-        if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
-        }
-
-        // Mengambil data baru dari request
-        $data = $request->input();
-
-        if (!$data) {
-            return response()->json(['message' => 'masukan data yang ingin diubah'], 204);
-        }
-        // Lakukan validasi data jika diperlukan
-        // ...
-
-        // Lakukan operasi update
-        $customer->update($data);
-
-        return response()->json(['message' => 'Customer updated', 'data' => $customer]);
 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy(Customer $customer)
     {
-        $id = $request->input('id');
-
-        $customer = Customer::find($id);
-
-        if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
-        }
-
         $customer->delete();
-
-        return response()->json(['message' => 'Customer deleted']);
+        return response()->json([
+            "message" => "success delete",
+            'rincian' => $customer
+        ], 200);
     }
 
 }
